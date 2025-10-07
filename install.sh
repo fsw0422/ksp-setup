@@ -123,6 +123,16 @@ if [ "$CONFIG_ONLY" = false ]; then
 	read response
 
 
+	echo "Installing UV"
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+
+
+	echo "Installing FNM"
+	curl -fsSL https://fnm.vercel.app/install | bash
+	echo "Please install and set a global Node version. If you have, press any key to continue..."
+	read response
+
+
 	echo "Installing SDKMAN"
 	curl -s "https://get.sdkman.io" | bash
 	echo "Please install and set a global JDK version. If you have, press any key to continue..."
