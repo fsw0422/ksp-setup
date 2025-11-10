@@ -143,6 +143,7 @@ read response
 
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
+# Hard link is used as devcontainer cannot recognize symlink properly
 rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
 rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
 rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
@@ -150,9 +151,23 @@ rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
 rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
 rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
 rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
-if [ "$CONFIG_ONLY" = false ]; then
-	rm -f ~/.sdkman/etc/config && ln ~/.ksp/sdkman_config ~/.sdkman/etc/config
-fi
+
+
+echo "Installing git post-merge hook..."
+mkdir -p ~/.ksp/.git/hooks
+cat > ~/.ksp/.git/hooks/post-merge << 'EOF'
+#!/bin/bash
+
+rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
+rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
+rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
+rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
+rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
+rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
+rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
+echo "Config files updated after merge"
+EOF
+chmod +x ~/.ksp/.git/hooks/post-merge
 
 
 echo "********** Installation Complete **********"
