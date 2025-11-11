@@ -2,8 +2,8 @@
 
 CONFIG_ONLY=false
 if [[ "$1" == "--only-config" ]]; then
-    CONFIG_ONLY=true
-    echo "Config only mode enabled"
+	CONFIG_ONLY=true
+	echo "Config only mode enabled"
 fi
 
 if [ "$CONFIG_ONLY" = false ]; then
@@ -89,7 +89,7 @@ if [ "$CONFIG_ONLY" = false ]; then
 		sudo ./get-docker.sh
 		sudo usermod -aG docker $USER
 		rm -f get-docker.sh
-    fi
+	fi
 
 
 	echo "Installing Kubernetes Tools"
@@ -174,11 +174,11 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 # Include custom ssh_config in ~/.ssh/config
 mkdir -p ~/.ssh
 if [ -f ~/.ssh/config ]; then
-    if ! grep -q "Include ~/.ksp/ssh_config" ~/.ssh/config; then
-        echo "Include ~/.ksp/ssh_config" >> ~/.ssh/config
-    fi
+	if ! grep -q "Include ~/.ksp/ssh_config" ~/.ssh/config; then
+		echo "Include ~/.ksp/ssh_config" >> ~/.ssh/config
+	fi
 else
-    echo "Include ~/.ksp/ssh_config" > ~/.ssh/config
+	echo "Include ~/.ksp/ssh_config" > ~/.ssh/config
 fi
 
 echo "Installing git hooks..."

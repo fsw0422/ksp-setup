@@ -17,12 +17,12 @@ rm -f ~/.vimrc
 
 # If ~/.ssh/config exists, remove the KSP include line
 if [ -f ~/.ssh/config ]; then
-    sed -i '/Include ~\/\.ksp\/ksp_ssh_config/d' ~/.ssh/config
+	sed -i '/Include ~\/\.ksp\/ksp_ssh_config/d' ~/.ssh/config
 
-    # If the file is now empty, remove it
-    if [ ! -s ~/.ssh/config ]; then
-        rm ~/.ssh/config
-    fi
+	# If the file is now empty, remove it
+	if [ ! -s ~/.ssh/config ]; then
+		rm ~/.ssh/config
+	fi
 fi
 
 rm -rf ~/.ksp

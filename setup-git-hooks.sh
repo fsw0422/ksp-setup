@@ -3,14 +3,14 @@
 KSP_DIR="${KSP_DIR:-$HOME/.ksp}"
 
 if [ ! -d "$KSP_DIR" ]; then
-    echo "Error: $KSP_DIR directory not found"
-    echo "Please clone your config repository first"
-    exit 1
+	echo "Error: $KSP_DIR directory not found"
+	echo "Please clone your config repository first"
+	exit 1
 fi
 
 if [ ! -d "$KSP_DIR/.git" ]; then
-    echo "Error: $KSP_DIR is not a git repository"
-    exit 1
+	echo "Error: $KSP_DIR is not a git repository"
+	exit 1
 fi
 
 echo "Installing git hooks in $KSP_DIR..."
