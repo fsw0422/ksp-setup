@@ -125,6 +125,8 @@ if [ "$CONFIG_ONLY" = false ]; then
 
 	echo "Installing UV"
 	curl -LsSf https://astral.sh/uv/install.sh | sh
+	echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
+	read response
 
 
 	echo "Installing FNM"
