@@ -143,6 +143,7 @@ read response
 
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
+
 # Hard link is used as devcontainer cannot recognize symlink properly
 rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
 rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
@@ -150,8 +151,16 @@ rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
 rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
 rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
 rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
-rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
 
+# Include custom ssh_config in ~/.ssh/config
+mkdir -p ~/.ssh
+if [ -f ~/.ssh/config ]; then
+    if ! grep -q "Include ~/.ksp/ssh_config" ~/.ssh/config; then
+        echo "Include ~/.ksp/ssh_config" >> ~/.ssh/config
+    fi
+else
+    echo "Include ~/.ksp/ssh_config" > ~/.ssh/config
+fi
 
 echo "Installing git hooks..."
 bash "$(dirname "$0")/setup-git-hooks.sh"

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Script to set up git hooks for automatic config file updates
-# Can be run standalone or called from install.sh
-
 KSP_DIR="${KSP_DIR:-$HOME/.ksp}"
 
 if [ ! -d "$KSP_DIR" ]; then
@@ -27,11 +24,9 @@ rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
 rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
 rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
 rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
-rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
 echo "Config files updated"
 '
 
-# Install hooks
 echo "$HOOK_SCRIPT" > "$KSP_DIR/.git/hooks/post-merge"
 chmod +x "$KSP_DIR/.git/hooks/post-merge"
 
