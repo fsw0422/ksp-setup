@@ -161,16 +161,15 @@ echo "Please download and install all MesloLGS fonts from https://github.com/rom
 read response
 
 
+# Hard link is used as devcontainer cannot recognize symlink properly
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
+[ -f ~/.tmux.conf ] && mv ~/.tmux.conf ~/.tmux.conf.backup-in-place-for-ksp; ln ~/.ksp/.tmux.conf ~/
+[ -f ~/.p10k.zsh ] && mv ~/.p10k.zsh ~/.p10k.zsh.backup-in-place-for-ksp; ln ~/.ksp/.p10k.zsh ~/
+[ -f ~/.zshrc ] && mv ~/.zshrc ~/.zshrc.backup-in-place-for-ksp; ln ~/.ksp/.zshrc ~/
+[ -f ~/.ideavimrc ] && mv ~/.ideavimrc ~/.ideavimrc.backup-in-place-for-ksp; ln ~/.ksp/.ideavimrc ~/
+[ -f ~/.vimrc ] && mv ~/.vimrc ~/.vimrc.backup-in-place-for-ksp; ln ~/.ksp/.vimrc ~/
 
-# Hard link is used as devcontainer cannot recognize symlink properly
-rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
-rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
-rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
-rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
-rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
-rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
 
 # Include custom ssh_config in ~/.ssh/config
 mkdir -p ~/.ssh

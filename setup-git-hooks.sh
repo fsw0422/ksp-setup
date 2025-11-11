@@ -18,12 +18,11 @@ mkdir -p "$KSP_DIR/.git/hooks"
 
 HOOK_SCRIPT='#!/bin/bash
 
-rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
-rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
-rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
-rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
-rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
-rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
+[ -f ~/.tmux.conf ] && mv ~/.tmux.conf ~/.tmux.conf.backup-in-place-for-ksp; ln ~/.ksp/.tmux.conf ~/
+[ -f ~/.p10k.zsh ] && mv ~/.p10k.zsh ~/.p10k.zsh.backup-in-place-for-ksp; ln ~/.ksp/.p10k.zsh ~/
+[ -f ~/.zshrc ] && mv ~/.zshrc ~/.zshrc.backup-in-place-for-ksp; ln ~/.ksp/.zshrc ~/
+[ -f ~/.ideavimrc ] && mv ~/.ideavimrc ~/.ideavimrc.backup-in-place-for-ksp; ln ~/.ksp/.ideavimrc ~/
+[ -f ~/.vimrc ] && mv ~/.vimrc ~/.vimrc.backup-in-place-for-ksp; ln ~/.ksp/.vimrc ~/
 echo "Config files updated"
 '
 
