@@ -154,24 +154,7 @@ rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
 
 
 echo "Installing git hooks..."
-mkdir -p ~/.ksp/.git/hooks
-HOOK_SCRIPT='#!/bin/bash
-
-rm -f ~/.gitconfig && ln ~/.ksp/.gitconfig ~/
-rm -f ~/.tmux.conf && ln ~/.ksp/.tmux.conf ~/
-rm -f ~/.p10k.zsh && ln ~/.ksp/.p10k.zsh ~/
-rm -f ~/.zshrc && ln ~/.ksp/.zshrc ~/
-rm -f ~/.ideavimrc && ln ~/.ksp/.ideavimrc ~/
-rm -f ~/.vimrc && ln ~/.ksp/.vimrc ~/
-rm -f ~/.ssh/config && ln ~/.ksp/ssh_config ~/.ssh/config
-echo "Config files updated"
-'
-echo "$HOOK_SCRIPT" > ~/.ksp/.git/hooks/post-merge
-chmod +x ~/.ksp/.git/hooks/post-merge
-echo "$HOOK_SCRIPT" > ~/.ksp/.git/hooks/post-commit
-chmod +x ~/.ksp/.git/hooks/post-commit
-echo "$HOOK_SCRIPT" > ~/.ksp/.git/hooks/post-checkout
-chmod +x ~/.ksp/.git/hooks/post-checkout
+bash "$(dirname "$0")/setup-git-hooks.sh"
 
 
 echo "********** Installation Complete **********"
