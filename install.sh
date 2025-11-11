@@ -118,7 +118,7 @@ if [ "$CONFIG_ONLY" = false ]; then
 
 
 	echo "Generating SSH key for Github clone access"
-	ssh-keygen -t rsa -b 4096 -C "fsw0422@gmail.com" -f ~/.ssh/github
+	ssh-keygen -t rsa -b 4096 -f ~/.ssh/github
 	echo "Have you regiestered the generated key to Github? If you have, press any key to continue..."
 	read response
 
