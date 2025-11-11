@@ -118,8 +118,26 @@ if [ "$CONFIG_ONLY" = false ]; then
 
 
 	echo "Generating SSH key for Github clone access"
-	ssh-keygen -t rsa -b 4096 -f ~/.ssh/github
-	echo "Have you regiestered the generated key to Github? If you have, press any key to continue..."
+	mkdir -p ~/.ssh
+	if [ ! -f ~/.ssh/github ]; then
+		ssh-keygen -t rsa -b 4096 -f ~/.ssh/github -N ""
+		echo "SSH key generated at ~/.ssh/github"
+	else
+		echo "SSH key already exists at ~/.ssh/github"
+	fi
+	echo ""
+	echo "=========================================="
+	echo "SSH Public Key:"
+	echo "=========================================="
+	cat ~/.ssh/github.pub
+	echo "=========================================="
+	echo ""
+	echo "Please add this key to your GitHub account:"
+	echo "1. Go to https://github.com/settings/ssh/new"
+	echo "2. Copy the key above and paste it"
+	echo "3. Give it a descriptive title (e.g., 'Dev Container Key')"
+	echo ""
+	echo "Press any key after you've added the key to GitHub..."
 	read response
 
 
