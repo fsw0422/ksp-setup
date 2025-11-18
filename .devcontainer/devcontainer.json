@@ -13,13 +13,5 @@
   },
   "remoteUser": "ubuntu",
   "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=/home/ubuntu/ksp-setup",
-  "workspaceFolder": "/home/ubuntu/ksp-setup",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-azuretools.vscode-containers",
-        "docker.docker"
-      ]
-    }
-  }
+  "workspaceFolder": "/home/ubuntu/ksp-setup"
 }
