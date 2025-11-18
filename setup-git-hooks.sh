@@ -23,6 +23,7 @@ HOOK_SCRIPT='#!/bin/bash
 [ -f ~/.zshrc ] && mv ~/.zshrc ~/.zshrc.backup-in-place-for-ksp; ln ~/.ksp/.zshrc ~/
 [ -f ~/.ideavimrc ] && mv ~/.ideavimrc ~/.ideavimrc.backup-in-place-for-ksp; ln ~/.ksp/.ideavimrc ~/
 [ -f ~/.vimrc ] && mv ~/.vimrc ~/.vimrc.backup-in-place-for-ksp; ln ~/.ksp/.vimrc ~/
+[ -f ~/.ssh.conf ] && mv ~/.ssh.conf ~/.ssh.conf.backup-in-place-for-ksp; ln ~/.ksp/.ssh.conf ~/
 echo "Config files updated"
 '
 

@@ -169,16 +169,17 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.zshrc ] && mv ~/.zshrc ~/.zshrc.backup-in-place-for-ksp; ln ~/.ksp/.zshrc ~/
 [ -f ~/.ideavimrc ] && mv ~/.ideavimrc ~/.ideavimrc.backup-in-place-for-ksp; ln ~/.ksp/.ideavimrc ~/
 [ -f ~/.vimrc ] && mv ~/.vimrc ~/.vimrc.backup-in-place-for-ksp; ln ~/.ksp/.vimrc ~/
+[ -f ~/.ssh.conf ] && mv ~/.ssh.conf ~/.ssh.conf.backup-in-place-for-ksp; ln ~/.ksp/.ssh.conf ~/
 
 
-# Include custom ssh_config in ~/.ssh/config
+# Include custom .ssh.conf in ~/.ssh/config
 mkdir -p ~/.ssh
 if [ -f ~/.ssh/config ]; then
-	if ! grep -q "Include ~/.ksp/ssh_config" ~/.ssh/config; then
-		echo "Include ~/.ksp/ssh_config" >> ~/.ssh/config
+	if ! grep -q "Include ~/.ssh.conf" ~/.ssh/config; then
+		echo "Include ~/.ssh.conf" >> ~/.ssh/config
 	fi
 else
-	echo "Include ~/.ksp/ssh_config" > ~/.ssh/config
+	echo "Include ~/.ssh.conf" > ~/.ssh/config
 fi
 
 echo "Installing git hooks..."

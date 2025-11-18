@@ -15,9 +15,12 @@ rm -f ~/.ideavimrc
 rm -f ~/.vimrc
 [ -f ~/.vimrc.backup-in-place-for-ksp ] && mv ~/.vimrc.backup-in-place-for-ksp ~/.vimrc
 
-# If ~/.ssh/config exists, remove the KSP include line
+rm -f ~/.ssh.conf
+[ -f ~/.ssh.conf.backup-in-place-for-ksp ] && mv ~/.ssh.conf.backup-in-place-for-ksp ~/.ssh.conf
+
+# If ~/.ssh/config exists, remove the custom SSH config inclusion line
 if [ -f ~/.ssh/config ]; then
-	sed -i '/Include ~\/\.ksp\/ksp_ssh_config/d' ~/.ssh/config
+	sed -i '/Include ~\/\.ssh\.conf/d' ~/.ssh/config
 
 	# If the file is now empty, remove it
 	if [ ! -s ~/.ssh/config ]; then
