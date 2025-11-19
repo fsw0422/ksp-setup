@@ -16,6 +16,10 @@ fi
 echo "Installing git hooks in $KSP_DIR..."
 mkdir -p "$KSP_DIR/.git/hooks"
 
+rm -f "$KSP_DIR/.git/hooks/post-merge"
+rm -f "$KSP_DIR/.git/hooks/post-commit"
+rm -f "$KSP_DIR/.git/hooks/post-checkout"
+
 HOOK_SCRIPT='#!/bin/bash
 
 [ -f ~/.tmux.conf ] && rm ~/.tmux.conf; ln ~/.ksp/.tmux.conf ~/
