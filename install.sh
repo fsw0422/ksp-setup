@@ -164,12 +164,12 @@ read response
 # Hard link is used as devcontainer cannot recognize symlink properly
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
-[ -f ~/.tmux.conf ] && mv ~/.tmux.conf ~/.tmux.conf.backup-in-place-for-ksp; ln ~/.ksp/.tmux.conf ~/
-[ -f ~/.p10k.zsh ] && mv ~/.p10k.zsh ~/.p10k.zsh.backup-in-place-for-ksp; ln ~/.ksp/.p10k.zsh ~/
-[ -f ~/.zshrc ] && mv ~/.zshrc ~/.zshrc.backup-in-place-for-ksp; ln ~/.ksp/.zshrc ~/
-[ -f ~/.ideavimrc ] && mv ~/.ideavimrc ~/.ideavimrc.backup-in-place-for-ksp; ln ~/.ksp/.ideavimrc ~/
-[ -f ~/.vimrc ] && mv ~/.vimrc ~/.vimrc.backup-in-place-for-ksp; ln ~/.ksp/.vimrc ~/
-[ -f ~/.ssh.conf ] && mv ~/.ssh.conf ~/.ssh.conf.backup-in-place-for-ksp; ln ~/.ksp/.ssh.conf ~/
+[ -f ~/.tmux.conf ] && rm ~/.tmux.conf; ln ~/.ksp/.tmux.conf ~/
+[ -f ~/.p10k.zsh ] && rm ~/.p10k.zsh; ln ~/.ksp/.p10k.zsh ~/
+[ -f ~/.zshrc ] && rm ~/.zshrc; ln ~/.ksp/.zshrc ~/
+[ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln ~/.ksp/.ideavimrc ~/
+[ -f ~/.vimrc ] && rm ~/.vimrc; ln ~/.ksp/.vimrc ~/
+[ -f ~/.ssh.conf ] && rm ~/.ssh.conf; ln ~/.ksp/.ssh.conf ~/
 
 
 # Include custom .ssh.conf in ~/.ssh/config
