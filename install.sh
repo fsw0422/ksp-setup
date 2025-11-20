@@ -169,17 +169,28 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.zshrc ] && rm ~/.zshrc; ln ~/.ksp/.zshrc ~/
 [ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln ~/.ksp/.ideavimrc ~/
 [ -f ~/.vimrc ] && rm ~/.vimrc; ln ~/.ksp/.vimrc ~/
-[ -f ~/.ssh.conf ] && rm ~/.ssh.conf; ln ~/.ksp/.ssh.conf ~/
 
 
-# Include custom .ssh.conf in ~/.ssh/config
+echo "Configuring SSH for GitHub..."
 mkdir -p ~/.ssh
+GITHUB_SSH_CONFIG="Host github.com
+    Hostname github.com
+    IdentityFile ~/.ssh/github"
 if [ -f ~/.ssh/config ]; then
-	if ! grep -q "Include ~/.ssh.conf" ~/.ssh/config; then
-		echo "Include ~/.ssh.conf" >> ~/.ssh/config
+	if grep -q "^Host github.com" ~/.ssh/config; then
+		# Host github.com exists, check if IdentityFile ~/.ssh/github is present
+		if ! grep -A 10 "^Host github.com" ~/.ssh/config | grep -q "IdentityFile ~/.ssh/github"; then
+			# Add IdentityFile to the existing Host github.com block
+			sed -i '/^Host github.com/a\    IdentityFile ~/.ssh/github' ~/.ssh/config
+		fi
+	else
+		# Add new Host github.com block
+		echo "" >> ~/.ssh/config
+		echo "$GITHUB_SSH_CONFIG" >> ~/.ssh/config
 	fi
 else
-	echo "Include ~/.ssh.conf" > ~/.ssh/config
+	# Create new config file with Host github.com
+	echo "$GITHUB_SSH_CONFIG" > ~/.ssh/config
 fi
 
 echo "Installing git hooks..."
