@@ -30,6 +30,7 @@ if [ "$CONFIG_ONLY" = false ]; then
 		sudo apt update
 		sudo DEBIAN_FRONTEND=noninteractive apt install -y \
 			zsh \
+			dnsutils \
 			locales \
 			tzdata \
 			git \
