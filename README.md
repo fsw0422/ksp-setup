@@ -1,3 +1,3 @@
 # Setup script for custom environment
 
-Contains script to install custom environment in various environments.
+Run `./install.sh` for full installation on a host machine, or `./install.sh --devcontainer` for devcontainer environments.

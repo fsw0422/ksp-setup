@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Parse arguments
+DEVCONTAINER=false
+for arg in "$@"; do
+	case $arg in
+		--devcontainer)
+			DEVCONTAINER=true
+			echo "Running in devcontainer mode - skipping tmux, Docker, and SSH setup"
+			shift
+			;;
+	esac
+done
+
 echo "Installing Dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -59,29 +71,37 @@ export RUNZSH=no
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 
-echo "Installing tmux 3.5"
-rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
-wget https://github.com/tmux/tmux/releases/download/3.5/tmux-3.5.tar.gz -O tmux-3.5.tar.gz
-tar zxvf tmux-3.5.tar.gz
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	(cd tmux-3.5 && ./configure --enable-utf8proc && make && sudo make install)
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Installing tmux 3.5"
+	rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
+	wget https://github.com/tmux/tmux/releases/download/3.5/tmux-3.5.tar.gz -O tmux-3.5.tar.gz
+	tar zxvf tmux-3.5.tar.gz
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		(cd tmux-3.5 && ./configure --enable-utf8proc && make && sudo make install)
+	else
+		(cd tmux-3.5 && ./configure && make && sudo make install)
+	fi
+	tmux kill-server
+	rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
 else
-	(cd tmux-3.5 && ./configure && make && sudo make install)
+	echo "Skipping tmux installation (devcontainer mode)"
 fi
-tmux kill-server
-rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
 
 
-echo "Installing Docker"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Please Install Docker Desktop. If you have, press any key to continue..."
-	read response
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Installing Docker"
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		echo "Please Install Docker Desktop. If you have, press any key to continue..."
+		read response
+	else
+		curl -fsSL https://get.docker.com -o get-docker.sh
+		chmod +x get-docker.sh
+		sudo ./get-docker.sh
+		sudo usermod -aG docker $USER
+		rm -f get-docker.sh
+	fi
 else
-	curl -fsSL https://get.docker.com -o get-docker.sh
-	chmod +x get-docker.sh
-	sudo ./get-docker.sh
-	sudo usermod -aG docker $USER
-	rm -f get-docker.sh
+	echo "Skipping Docker installation (devcontainer mode)"
 fi
 
 
@@ -110,28 +130,32 @@ else
 fi
 
 
-echo "Generating SSH key for Github clone access"
-mkdir -p ~/.ssh
-if [ ! -f ~/.ssh/github ]; then
-	ssh-keygen -t rsa -b 4096 -f ~/.ssh/github -N ""
-	echo "SSH key generated at ~/.ssh/github"
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Generating SSH key for Github clone access"
+	mkdir -p ~/.ssh
+	if [ ! -f ~/.ssh/github ]; then
+		ssh-keygen -t rsa -b 4096 -f ~/.ssh/github -N ""
+		echo "SSH key generated at ~/.ssh/github"
+	else
+		echo "SSH key already exists at ~/.ssh/github"
+	fi
+	echo ""
+	echo "=========================================="
+	echo "SSH Public Key:"
+	echo "=========================================="
+	cat ~/.ssh/github.pub
+	echo "=========================================="
+	echo ""
+	echo "Please add this key to your GitHub account:"
+	echo "1. Go to https://github.com/settings/ssh/new"
+	echo "2. Copy the key above and paste it"
+	echo "3. Give it a descriptive title (e.g., 'Dev Container Key')"
+	echo ""
+	echo "Press any key after you've added the key to GitHub..."
+	read response
 else
-	echo "SSH key already exists at ~/.ssh/github"
+	echo "Skipping SSH key generation (devcontainer mode)"
 fi
-echo ""
-echo "=========================================="
-echo "SSH Public Key:"
-echo "=========================================="
-cat ~/.ssh/github.pub
-echo "=========================================="
-echo ""
-echo "Please add this key to your GitHub account:"
-echo "1. Go to https://github.com/settings/ssh/new"
-echo "2. Copy the key above and paste it"
-echo "3. Give it a descriptive title (e.g., 'Dev Container Key')"
-echo ""
-echo "Press any key after you've added the key to GitHub..."
-read response
 
 
 echo "Installing UV"
@@ -162,31 +186,37 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.vimrc ] && rm ~/.vimrc; ln -s ~/.ksp/.vimrc ~/.vimrc
 
 
-echo "Configuring SSH for GitHub..."
-mkdir -p ~/.ssh
-GITHUB_SSH_CONFIG="Host github.com
-    Hostname github.com
-    IdentityFile ~/.ssh/github"
-if [ -f ~/.ssh/config ]; then
-	if grep -q "^Host github.com" ~/.ssh/config; then
-		# Host github.com exists, check if IdentityFile ~/.ssh/github is present
-		if ! grep -A 10 "^Host github.com" ~/.ssh/config | grep -q "IdentityFile ~/.ssh/github"; then
-			# Add IdentityFile to the existing Host github.com block
-			sed -i '/^Host github.com/a\    IdentityFile ~/.ssh/github' ~/.ssh/config
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Configuring SSH for GitHub..."
+	mkdir -p ~/.ssh
+	GITHUB_SSH_CONFIG="Host github.com
+	    Hostname github.com
+	    IdentityFile ~/.ssh/github"
+	if [ -f ~/.ssh/config ]; then
+		if grep -q "^Host github.com" ~/.ssh/config; then
+			# Host github.com exists, check if IdentityFile ~/.ssh/github is present
+			if ! grep -A 10 "^Host github.com" ~/.ssh/config | grep -q "IdentityFile ~/.ssh/github"; then
+				# Add IdentityFile to the existing Host github.com block
+				sed -i '/^Host github.com/a\    IdentityFile ~/.ssh/github' ~/.ssh/config
+			fi
+		else
+			# Add new Host github.com block
+			echo "" >> ~/.ssh/config
+			echo "$GITHUB_SSH_CONFIG" >> ~/.ssh/config
 		fi
 	else
-		# Add new Host github.com block
-		echo "" >> ~/.ssh/config
-		echo "$GITHUB_SSH_CONFIG" >> ~/.ssh/config
+		# Create new config file with Host github.com
+		echo "$GITHUB_SSH_CONFIG" > ~/.ssh/config
 	fi
 else
-	# Create new config file with Host github.com
-	echo "$GITHUB_SSH_CONFIG" > ~/.ssh/config
+	echo "Skipping SSH configuration (devcontainer mode)"
 fi
 
 
 echo "********** Installation Complete **********"
 echo "Please proceed to OneDrive README file and finish platform-specific settings"
-echo "Press any key to start a new Tmux session"
-read response
-tmux
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Press any key to start a new Tmux session"
+	read response
+	tmux
+fi
