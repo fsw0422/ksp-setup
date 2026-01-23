@@ -1,13 +1,6 @@
 #!/bin/bash
 
-CONFIG_ONLY=false
-if [[ "$1" == "--only-config" ]]; then
-	CONFIG_ONLY=true
-	echo "Config only mode enabled"
-fi
-
-if [ "$CONFIG_ONLY" = false ]; then
-	echo "Installing Dependencies"
+echo "Installing Dependencies"
 	if [[ "$OSTYPE" == "darwin"* ]]; then
 		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 		brew install \
@@ -152,7 +145,6 @@ if [ "$CONFIG_ONLY" = false ]; then
 	curl -fsSL https://fnm.vercel.app/install | bash
 	echo "Please install and set a global Node version. If you have, press any key to continue..."
 	read response
-fi
 
 
 echo "Installing Oh My ZSH plugins..."
@@ -200,8 +192,6 @@ bash "$(dirname "$0")/setup-git-hooks.sh"
 
 echo "********** Installation Complete **********"
 echo "Please proceed to OneDrive README file and finish platform-specific settings"
-if [ "$CONFIG_ONLY" = false ]; then
-	echo "Press any key to start a new Tmux session"
-	read response
-	tmux
-fi
+echo "Press any key to start a new Tmux session"
+read response
+tmux
