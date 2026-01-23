@@ -9,9 +9,12 @@
     "--rm"
   ],
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    }
   },
   "remoteUser": "ubuntu",
-  "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=/home/ubuntu/ksp-setup",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/ubuntu/ksp-setup,type=bind",
   "workspaceFolder": "/home/ubuntu/ksp-setup"
 }
