@@ -154,14 +154,13 @@ echo "Please download and install all MesloLGS fonts from https://github.com/rom
 read response
 
 
-# Hard link is used as devcontainer cannot recognize symlink properly
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
-[ -f ~/.tmux.conf ] && rm ~/.tmux.conf; ln ~/.ksp/.tmux.conf ~/
-[ -f ~/.p10k.zsh ] && rm ~/.p10k.zsh; ln ~/.ksp/.p10k.zsh ~/
-[ -f ~/.zshrc ] && rm ~/.zshrc; ln ~/.ksp/.zshrc ~/
-[ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln ~/.ksp/.ideavimrc ~/
-[ -f ~/.vimrc ] && rm ~/.vimrc; ln ~/.ksp/.vimrc ~/
+[ -f ~/.tmux.conf ] && rm ~/.tmux.conf; ln -s ~/.ksp/.tmux.conf ~/.tmux.conf
+[ -f ~/.p10k.zsh ] && rm ~/.p10k.zsh; ln -s ~/.ksp/.p10k.zsh ~/.p10k.zsh
+[ -f ~/.zshrc ] && rm ~/.zshrc; ln -s ~/.ksp/.zshrc ~/.zshrc
+[ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln -s ~/.ksp/.ideavimrc ~/.ideavimrc
+[ -f ~/.vimrc ] && rm ~/.vimrc; ln -s ~/.ksp/.vimrc ~/.vimrc
 
 
 echo "Configuring SSH for GitHub..."
@@ -185,9 +184,6 @@ else
 	# Create new config file with Host github.com
 	echo "$GITHUB_SSH_CONFIG" > ~/.ssh/config
 fi
-
-echo "Installing git hooks..."
-bash "$(dirname "$0")/setup-git-hooks.sh"
 
 
 echo "********** Installation Complete **********"
