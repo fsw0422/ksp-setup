@@ -20,7 +20,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 		libevent \
 		utf8proc
 else
-	# Devcontainer environment (Linux)
 	sudo apt update
 	sudo DEBIAN_FRONTEND=noninteractive apt install -y \
 		zsh \
@@ -38,6 +37,13 @@ else
 		openssh-client \
 		software-properties-common \
 		bison
+fi
+
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	echo "Installing Git Credential Manager"
+	brew install --cask git-credential-manager
+	git-credential-manager configure
 fi
 
 
