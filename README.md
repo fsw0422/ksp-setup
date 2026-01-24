@@ -1,3 +1,5 @@
 # Setup script for custom environment
 
-Run `./install.sh` for full installation on a host machine, or `./install.sh --devcontainer` for devcontainer environments.
+The default installation is primarily targeted toward macOS host machines. Non-macOS environments (assumed to be devcontainers) are supported with a lighter, non-GUI-oriented setup (no tmux, UV, or FNM).
+
+Run `./install.sh` to install.
