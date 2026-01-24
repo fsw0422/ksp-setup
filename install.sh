@@ -6,7 +6,7 @@ for arg in "$@"; do
 	case $arg in
 		--devcontainer)
 			DEVCONTAINER=true
-			echo "Running in devcontainer mode - skipping tmux, Docker, and SSH setup"
+			echo "Running in devcontainer mode - skipping tmux, Docker, SSH, UV, and FNM setup"
 			shift
 			;;
 	esac
@@ -158,16 +158,24 @@ else
 fi
 
 
-echo "Installing UV"
-curl -LsSf https://astral.sh/uv/install.sh | sh
-echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
-read response
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Installing UV"
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+	echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
+	read response
+else
+	echo "Skipping UV installation (devcontainer mode)"
+fi
 
 
-echo "Installing FNM"
-curl -fsSL https://fnm.vercel.app/install | bash
-echo "Please install and set a global Node version. If you have, press any key to continue..."
-read response
+if [ "$DEVCONTAINER" = false ]; then
+	echo "Installing FNM"
+	curl -fsSL https://fnm.vercel.app/install | bash
+	echo "Please install and set a global Node version. If you have, press any key to continue..."
+	read response
+else
+	echo "Skipping FNM installation (devcontainer mode)"
+fi
 
 
 echo "Installing Oh My ZSH plugins..."
