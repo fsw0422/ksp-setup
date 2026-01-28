@@ -3,6 +3,8 @@
 ## Windows
 
 - Install Docker Desktop (Don't use WSL as backend as we will be using devcontainers)
+  - Turn on 'Start Docker Desktop when you sign in to your computer'
+  - Turn off 'Open Docker Dashboard when Docker Desktop starts'
   - Adjust resource to higher limits
 - Install Git
   - Uncheck 'Windows Explorer integration'
@@ -24,6 +26,8 @@
 ## Mac
 
 - Install Docker Desktop
+  - Turn on 'Start Docker Desktop when you sign in to your computer'
+  - Turn off 'Open Docker Dashboard when Docker Desktop starts'
 - Install Iterm2
   - Import Terminal profile 'Default.json'
 - Uncheck all search result except 'Applications' and 'Folders' in Spotlight settings
