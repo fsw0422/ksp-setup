@@ -27,16 +27,20 @@ else
 		locales \
 		tzdata \
 		git \
+		xclip \
 		curl \
 		wget \
 		gpg \
 		apt-transport-https \
 		gnupg \
-		vim \
+		vim-gtk3 \
 		build-essential \
 		openssh-client \
+		apt-transport-https \
 		software-properties-common \
-		bison
+		bison \
+		libncurses5-dev:amd64 \
+		libevent-dev
 fi
 
 
@@ -60,17 +64,17 @@ export RUNZSH=no
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 
+echo "Installing tmux 3.5"
+rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
+wget https://github.com/tmux/tmux/releases/download/3.5/tmux-3.5.tar.gz -O tmux-3.5.tar.gz
+tar zxvf tmux-3.5.tar.gz
 if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Installing tmux 3.5"
-	rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
-	wget https://github.com/tmux/tmux/releases/download/3.5/tmux-3.5.tar.gz -O tmux-3.5.tar.gz
-	tar zxvf tmux-3.5.tar.gz
 	(cd tmux-3.5 && ./configure --enable-utf8proc && make && sudo make install)
-	tmux kill-server
-	rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
 else
-	echo "Skipping tmux installation (devcontainer environment)"
+	(cd tmux-3.5 && ./configure && make && sudo make install)
 fi
+tmux kill-server
+rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
 
 
 echo "Installing Kubernetes Tools"
@@ -82,40 +86,30 @@ else
 	sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 	echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 	sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
-	sudo apt-get update
-	sudo apt-get install -y kubectl
 
 	# helm
 	curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
 	echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-	sudo apt-get update
-	sudo apt-get install helm
 
 	# k9s
 	wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb
-	sudo apt install ./k9s_linux_amd64.deb
+
+	sudo apt update
+	sudo apt install -y kubectl helm ./k9s_linux_amd64.deb
 	sudo rm k9s_linux_amd64.deb
 fi
 
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Installing UV"
-	curl -LsSf https://astral.sh/uv/install.sh | sh
-	echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
-	read response
-else
-	echo "Skipping UV installation (devcontainer environment)"
-fi
+echo "Installing UV"
+curl -LsSf https://astral.sh/uv/install.sh | sh
+echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
+read response
 
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Installing FNM"
-	curl -fsSL https://fnm.vercel.app/install | bash
-	echo "Please install and set a global Node version. If you have, press any key to continue..."
-	read response
-else
-	echo "Skipping FNM installation (devcontainer environment)"
-fi
+echo "Installing FNM"
+curl -fsSL https://fnm.vercel.app/install | bash
+echo "Please install and set a global Node version. If you have, press any key to continue..."
+read response
 
 
 echo "Installing Oh My ZSH plugins..."
@@ -136,8 +130,6 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 
 echo "********** Installation Complete **********"
 echo "Please proceed to README file and finish platform-specific settings"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Press any key to start a new Tmux session"
-	read response
-	tmux
-fi
+echo "Press any key to start a new Tmux session"
+read response
+tmux
