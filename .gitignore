@@ -27,3 +27,4 @@
 .devcontainer/.update*
 get-docker.sh
 k9s_linux_amd64*
+.devcontainer/setup-custom-dev-env.sh
