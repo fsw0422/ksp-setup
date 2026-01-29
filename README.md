@@ -2,6 +2,11 @@
 
 ## Windows
 
+- Install Windows Terminal
+  - 'Settings' -> 'PowerShell' -> 'Appearance'
+    - Change 'Font face' to 'MesloLGS' font (Install 'MesloLGS' font for Powerlevel10K)
+    - Change 'Font size' to 10
+    - Change 'Cursor shape' to 'Filled box'
 - Install Docker Desktop (Don't use WSL as backend as we will be using devcontainers)
   - Turn on 'Start Docker Desktop when you sign in to your computer'
   - Turn off 'Open Docker Dashboard when Docker Desktop starts'
