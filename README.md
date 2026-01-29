@@ -33,6 +33,7 @@
 - Install Docker Desktop
   - Turn on 'Start Docker Desktop when you sign in to your computer'
   - Turn off 'Open Docker Dashboard when Docker Desktop starts'
+  - Adjust resource to higher limits
 - Install Iterm2
   - Import Terminal profile 'Default.json'
 - Uncheck all search result except 'Applications' and 'Folders' in Spotlight settings
