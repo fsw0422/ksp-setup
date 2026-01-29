@@ -18,6 +18,7 @@
 - Turn off everything in 'Settings' -> 'Personalization' -> 'Start'
 - Uninstall redundant apps under 'Settings' -> 'App'
 - Uninstall WSL
+  - 'Windows Features' -> untick 'Windows Subsystem for Linux' and 'Virutal Machine Platform'
 - Open 'File Explorer Options' -> Uncheck 'Hide File Extensions'
 - Turn off 'For improved security, only allow Windows Hello sign-in for Microsoft accounts on this device' in sign-in options
 - 'Windows Update' -> 'Advanced options' -> Turn on 'Recieve updates for other Microsoft products' for auto WSL2 update
