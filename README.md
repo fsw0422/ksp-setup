@@ -2,8 +2,10 @@
 
 ## Windows
 
+- Install latest 'PowerShell Core' (not 'Windows PowerShell')
 - Install Windows Terminal
-  - 'Settings' -> 'PowerShell' -> 'Appearance'
+  - 'Settings' -> 'Defaults' -> 'Advanced' -> Set 'Bell notification style' to 'None'
+  - 'Settings' -> 'PowerShell' (not 'Windows PowerShell') -> 'Appearance'
     - Change 'Font face' to 'MesloLGS' font (Install 'MesloLGS' font for Powerlevel10K)
     - Change 'Font size' to 10
     - Change 'Cursor shape' to 'Filled box'
