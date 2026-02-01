@@ -2,25 +2,26 @@
 
 ## Windows
 
-- Install latest 'PowerShell Core' (not 'Windows PowerShell')
+- Install 'PowerShell Core' (not 'Windows PowerShell')
 - Install Windows Terminal
   - 'Settings' -> 'Defaults' -> 'Advanced' -> Set 'Bell notification style' to 'None'
   - 'Settings' -> 'PowerShell' (not 'Windows PowerShell') -> 'Appearance'
     - Change 'Font face' to 'MesloLGS' font (Install 'MesloLGS' font for Powerlevel10K)
     - Change 'Font size' to 10
     - Change 'Cursor shape' to 'Filled box'
-- Install Docker Desktop (Don't use WSL as backend as we will be using devcontainers)
-  - Turn on 'Start Docker Desktop when you sign in to your computer'
-  - Turn off 'Open Docker Dashboard when Docker Desktop starts'
-  - Adjust resource to higher limits
+- Install 'Github Copilot CLI'
 - Install Git
   - Uncheck 'Windows Explorer integration'
   - Override default branch name to 'main'
   - Select 'Checkout as-is, commit Unix-style line endings'
-- Turn off everything in 'Settings' -> 'Personalization' -> 'Start'
-- Uninstall redundant apps under 'Settings' -> 'App'
 - Uninstall WSL
   - 'Windows Features' -> untick 'Windows Subsystem for Linux' and 'Virutal Machine Platform'
+- Install Docker Desktop (Don't use WSL as backend as we will be using devcontainers)
+  - Turn on 'Start Docker Desktop when you sign in to your computer'
+  - Turn off 'Open Docker Dashboard when Docker Desktop starts'
+  - Adjust resource to higher limits
+- Turn off everything in 'Settings' -> 'Personalization' -> 'Start'
+- Uninstall redundant apps under 'Settings' -> 'App'
 - Open 'File Explorer Options' -> Uncheck 'Hide File Extensions'
 - Turn off 'For improved security, only allow Windows Hello sign-in for Microsoft accounts on this device' in sign-in options
 - 'Windows Update' -> 'Advanced options' -> Turn on 'Recieve updates for other Microsoft products' for auto WSL2 update
@@ -33,12 +34,13 @@
 
 ## Mac
 
+- Install Iterm2
+  - Import Terminal profile 'Default.json'
+- Install 'Github Copilot CLI'
 - Install Docker Desktop
   - Turn on 'Start Docker Desktop when you sign in to your computer'
   - Turn off 'Open Docker Dashboard when Docker Desktop starts'
   - Adjust resource to higher limits
-- Install Iterm2
-  - Import Terminal profile 'Default.json'
 - Uncheck all search result except 'Applications' and 'Folders' in Spotlight settings
 - Desktop & Dock
   - Auto hide dock
