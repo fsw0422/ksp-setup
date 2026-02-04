@@ -23,6 +23,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 		grep \
 		git \
 		wget \
+		pkg-config \
 		vim \
 		ncurses \
 		libevent \
