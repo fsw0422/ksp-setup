@@ -31,7 +31,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
 	sudo apt update
 	sudo DEBIAN_FRONTEND=noninteractive apt install -y \
-		zsh \
 		dnsutils \
 		locales \
 		tzdata \
