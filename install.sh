@@ -110,20 +110,20 @@ fi
 
 echo "Installing UV"
 curl -LsSf https://astral.sh/uv/install.sh | sh
-echo "Please install and set a global Python version (to override the default system one). If you have, press any key to continue..."
+echo "Please install and set a global Python version (to override the default system one). If you've understood, press any key to continue..."
 read response
 
 
 echo "Installing FNM"
 curl -fsSL https://fnm.vercel.app/install | bash
-echo "Please install and set a global Node version. If you have, press any key to continue..."
+echo "Please install and set a global Node version. If you've understood, press any key to continue..."
 read response
 
 
 echo "Installing Oh My ZSH plugins..."
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-echo "Please download and install all MesloLGS fonts from https://github.com/romkatv/powerlevel10k-media and set it as your font for terminal. If you have, press any key to continue..."
+echo "Please download and install all MesloLGS fonts from https://github.com/romkatv/powerlevel10k-media and set it as your font for terminal. If you've understood, press any key to continue..."
 read response
 
 
