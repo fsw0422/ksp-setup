@@ -8,12 +8,7 @@
   "runArgs": [
     "--rm"
   ],
-  "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  },
   "remoteUser": "ubuntu",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/ubuntu/ksp-setup,type=bind",
-  "workspaceFolder": "/home/ubuntu/ksp-setup",
-  // Waiting for devcontainer extension for customization feature https://github.com/devcontainers/spec/issues/22#event-20876902965
-  "postCreateCommand": "if [ -f .devcontainer/setup-custom-dev-env.sh ]; then sh .devcontainer/setup-custom-dev-env.sh; fi;"
+  "workspaceFolder": "/home/ubuntu/ksp-setup"
 }

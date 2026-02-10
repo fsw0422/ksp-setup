@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Detect CPU architecture
+ARCH=$(uname -m)
+if [[ "$ARCH" == "x86_64" ]]; then
+	DEB_ARCH="amd64"
+elif [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+	DEB_ARCH="arm64"
+else
+	echo "Unsupported architecture: $ARCH"
+	exit 1
+fi
+echo "Detected architecture: $ARCH (deb: $DEB_ARCH)"
+
+
 echo "Installing Dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -47,7 +60,7 @@ else
 		apt-transport-https \
 		software-properties-common \
 		bison \
-		libncurses5-dev:amd64 \
+		libncurses5-dev:${DEB_ARCH} \
 		libevent-dev
 fi
 
@@ -100,11 +113,11 @@ else
 	echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
 
 	# k9s
-	wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb
+	wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_${DEB_ARCH}.deb
 
 	sudo apt update
-	sudo apt install -y kubectl helm ./k9s_linux_amd64.deb
-	sudo rm k9s_linux_amd64.deb
+	sudo apt install -y kubectl helm ./k9s_linux_${DEB_ARCH}.deb
+	sudo rm k9s_linux_${DEB_ARCH}.deb
 fi
 
 

@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-RUN apt update && apt install -y sudo zsh
+RUN apt update && apt install -y sudo zsh git
 
 # Give ubuntu user sudo privileges (ubuntu user already exists in the base image)
 RUN echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
