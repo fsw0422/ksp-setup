@@ -13,8 +13,9 @@ fi
 echo "Detected architecture: $ARCH (deb: $DEB_ARCH)"
 
 
-echo "Installing Dependencies"
+echo "Installing Platform-Specific Dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
+	# Homebrew
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	if [[ -x /opt/homebrew/bin/brew ]]; then
 		eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -24,6 +25,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 		echo "Homebrew was installed but brew is not on PATH yet. Restart your shell or add it manually."
 		exit 1
 	fi
+
+	# Dependencies + CLI Tools + Kubernetes Tools
 	brew install \
 		coreutils \
 		findutils \
@@ -40,8 +43,57 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 		vim \
 		ncurses \
 		libevent \
-		utf8proc
+		utf8proc \
+		gh \
+		ripgrep \
+		yq \
+		jq \
+		kubectl \
+		helm \
+		k9s
+
+	# Git Credential Manager
+	echo "Installing Git Credential Manager"
+	brew install --cask git-credential-manager
+	git-credential-manager configure
 else
+	# Prerequisites needed before setting up APT repositories
+	echo "Installing prerequisites (curl, wget, gpg)"
+	sudo apt update
+	sudo apt install -y curl wget gpg gnupg apt-transport-https ca-certificates
+
+	# Locale
+	echo "Setting up Locale to 'en_US.UTF-8'"
+	sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+	sudo locale-gen
+	sudo update-locale LANG=en_US.UTF-8
+
+	# APT repository: GitHub CLI
+	curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+	sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+	echo "deb [arch=${DEB_ARCH} signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+	# APT repository: kubectl
+	curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+	sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+	echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+	sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+
+	# APT repository: helm
+	curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+	echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+	# yq (Mike Farah's version) - direct binary download
+	echo "Installing yq"
+	sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${DEB_ARCH} -O /usr/local/bin/yq
+	sudo chmod +x /usr/local/bin/yq
+
+	# k9s - direct deb download
+	rm -f k9s_linux_${DEB_ARCH}.deb k9s_linux_${DEB_ARCH}.deb.*
+	wget -O k9s_linux_${DEB_ARCH}.deb https://github.com/derailed/k9s/releases/latest/download/k9s_linux_${DEB_ARCH}.deb
+
+	# Single apt update + install for all packages
+	echo "Installing all APT packages"
 	sudo apt update
 	sudo DEBIAN_FRONTEND=noninteractive apt install -y \
 		dnsutils \
@@ -57,26 +109,17 @@ else
 		vim-gtk3 \
 		build-essential \
 		openssh-client \
-		apt-transport-https \
 		software-properties-common \
 		bison \
 		libncurses5-dev:${DEB_ARCH} \
-		libevent-dev
-fi
-
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	echo "Installing Git Credential Manager"
-	brew install --cask git-credential-manager
-	git-credential-manager configure
-fi
-
-
-if [[ "$OSTYPE" != "darwin"* ]]; then
-	echo "Setting up Locale to 'en_US.UTF-8'"
-	sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
-	sudo locale-gen
-	sudo update-locale LANG=en_US.UTF-8
+		libevent-dev \
+		gh \
+		ripgrep \
+		jq \
+		kubectl \
+		helm \
+		./k9s_linux_${DEB_ARCH}.deb
+	rm -f k9s_linux_${DEB_ARCH}.deb k9s_linux_${DEB_ARCH}.deb.*
 fi
 
 
@@ -96,29 +139,6 @@ else
 fi
 tmux kill-server
 rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
-
-
-echo "Installing Kubernetes Tools"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	brew install kubectl helm k9s
-else
-	# kubectl
-	curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-	sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-	echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-	sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
-
-	# helm
-	curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-	echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-
-	# k9s
-	wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_${DEB_ARCH}.deb
-
-	sudo apt update
-	sudo apt install -y kubectl helm ./k9s_linux_${DEB_ARCH}.deb
-	sudo rm k9s_linux_${DEB_ARCH}.deb
-fi
 
 
 echo "Installing UV"
