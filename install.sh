@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Requirement check: ZSH must be installed and set as default shell
+if [[ "$(basename "$SHELL")" != "zsh" ]]; then
+	echo "This script requires ZSH to be installed and set as your default shell."
+	echo "Current shell: $SHELL"
+	echo "Please install ZSH, set it as your default shell, and re-run this script."
+	exit 1
+fi
+
 # Detect CPU architecture
 ARCH=$(uname -m)
 if [[ "$ARCH" == "x86_64" ]]; then
