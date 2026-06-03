@@ -149,6 +149,17 @@ tmux kill-server
 rm -f tmux-3.5.tar.gz && rm -rf tmux-3.5
 
 
+echo "Installing Tmux Plugin Manager"
+TPM_DIR="${HOME}/.tmux/plugins/tpm"
+mkdir -p "$(dirname "${TPM_DIR}")"
+if [[ -d "${TPM_DIR}/.git" ]]; then
+	git -C "${TPM_DIR}" pull --ff-only
+else
+	rm -rf "${TPM_DIR}"
+	git clone https://github.com/tmux-plugins/tpm "${TPM_DIR}"
+fi
+
+
 echo "Installing UV"
 curl -LsSf https://astral.sh/uv/install.sh | sh
 echo "Please install and set a global Python version (to override the default system one). If you've understood, press any key to continue..."
@@ -175,6 +186,24 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.zshrc ] && rm ~/.zshrc; ln -s ~/.ksp/.zshrc ~/.zshrc
 [ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln -s ~/.ksp/.ideavimrc ~/.ideavimrc
 [ -f ~/.vimrc ] && rm ~/.vimrc; ln -s ~/.ksp/.vimrc ~/.vimrc
+
+
+echo "Installing tmux plugins..."
+if [[ -x "${TPM_DIR}/bin/install_plugins" ]]; then
+	TPM_BOOTSTRAP_SESSION="ksp-setup-tpm"
+	TPM_BOOTSTRAP_CREATED=false
+	if ! tmux has-session -t "${TPM_BOOTSTRAP_SESSION}" 2>/dev/null; then
+		tmux new-session -d -s "${TPM_BOOTSTRAP_SESSION}"
+		TPM_BOOTSTRAP_CREATED=true
+	fi
+	tmux source-file ~/.tmux.conf
+	"${TPM_DIR}/bin/install_plugins"
+	if [[ "${TPM_BOOTSTRAP_CREATED}" == "true" ]]; then
+		tmux kill-session -t "${TPM_BOOTSTRAP_SESSION}"
+	fi
+else
+	echo "Tmux Plugin Manager installer not found at ${TPM_DIR}/bin/install_plugins"
+fi
 
 
 echo "********** Installation Complete **********"
