@@ -197,11 +197,8 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 
 
 echo "Installing Claude Code and Codex configs..."
-# The filter commits only the portable part of the live Codex config; git does not clone it.
-git -C ~/.ksp config filter.codex-config.clean "sh codex/clean-config.sh"
-git -C ~/.ksp config filter.codex-config.required true
 mkdir -p ~/.claude ~/.codex
-for link in .claude/settings.json:claude/settings.json .claude/CLAUDE.md:AGENTS.md .codex/AGENTS.md:AGENTS.md .codex/config.toml:codex/config.toml; do
+for link in .claude/settings.json:claude/settings.json .claude/CLAUDE.md:AGENTS.md .codex/AGENTS.md:AGENTS.md; do
 	target="${HOME}/${link%%:*}"
 	# Keep an existing real file as .bak instead of deleting it.
 	if [[ -e "${target}" && ! -L "${target}" ]]; then
@@ -209,6 +206,12 @@ for link in .claude/settings.json:claude/settings.json .claude/CLAUDE.md:AGENTS.
 	fi
 	ln -sfn "${HOME}/.ksp/${link#*:}" "${target}"
 done
+# The Codex base is the system layer, so ~/.codex/config.toml stays Codex's own local file.
+sudo mkdir -p /etc/codex
+if [[ -e /etc/codex/config.toml && ! -L /etc/codex/config.toml ]]; then
+	sudo mv /etc/codex/config.toml /etc/codex/config.toml.bak
+fi
+sudo ln -sfn "${HOME}/.ksp/codex/config.toml" /etc/codex/config.toml
 
 
 echo "Installing tmux plugins..."
