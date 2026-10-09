@@ -172,6 +172,14 @@ echo "Please install and set a global Node version. If you've understood, press 
 read response
 
 
+echo "Installing Claude Code"
+curl -fsSL https://claude.ai/install.sh | bash
+
+
+echo "Installing Codex CLI"
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+
+
 echo "Installing Oh My ZSH plugins..."
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
@@ -186,6 +194,21 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.zshrc ] && rm ~/.zshrc; ln -s ~/.ksp/.zshrc ~/.zshrc
 [ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln -s ~/.ksp/.ideavimrc ~/.ideavimrc
 [ -f ~/.vimrc ] && rm ~/.vimrc; ln -s ~/.ksp/.vimrc ~/.vimrc
+
+
+echo "Installing Claude Code and Codex configs..."
+# The filter commits only the portable part of the live Codex config; git does not clone it.
+git -C ~/.ksp config filter.codex-config.clean "sh codex/clean-config.sh"
+git -C ~/.ksp config filter.codex-config.required true
+mkdir -p ~/.claude ~/.codex
+for link in .claude/settings.json:claude/settings.json .claude/CLAUDE.md:AGENTS.md .codex/AGENTS.md:AGENTS.md .codex/config.toml:codex/config.toml; do
+	target="${HOME}/${link%%:*}"
+	# Keep an existing real file as .bak instead of deleting it.
+	if [[ -e "${target}" && ! -L "${target}" ]]; then
+		mv "${target}" "${target}.bak"
+	fi
+	ln -sfn "${HOME}/.ksp/${link#*:}" "${target}"
+done
 
 
 echo "Installing tmux plugins..."
