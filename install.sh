@@ -172,14 +172,6 @@ echo "Please install and set a global Node version. If you've understood, press 
 read response
 
 
-echo "Installing Claude Code"
-curl -fsSL https://claude.ai/install.sh | bash
-
-
-echo "Installing Codex CLI"
-curl -fsSL https://chatgpt.com/codex/install.sh | sh
-
-
 echo "Installing Oh My ZSH plugins..."
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
