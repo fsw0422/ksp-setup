@@ -189,21 +189,43 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 
 
 echo "Installing Claude Code and Codex configs..."
-mkdir -p ~/.claude ~/.codex
-for link in .claude/settings.json:claude/settings.json .claude/CLAUDE.md:AGENTS.md .codex/AGENTS.md:AGENTS.md; do
-	target="${HOME}/${link%%:*}"
-	# Keep an existing real file as .bak instead of deleting it.
+while true; do
+	echo "Which configs do you want to install? [claude/codex/both/none]"
+	read ai_tools
+	case "${ai_tools}" in
+		claude|codex|both|none) break ;;
+	esac
+done
+
+# Links ~/<target> to ~/.ksp/<source>, keeping an existing real file as .bak.
+link_ksp_config() {
+	local target="${HOME}/$1"
 	if [[ -e "${target}" && ! -L "${target}" ]]; then
 		mv "${target}" "${target}.bak"
 	fi
-	ln -sfn "${HOME}/.ksp/${link#*:}" "${target}"
-done
-# The Codex base is the system layer, so ~/.codex/config.toml stays Codex's own local file.
-sudo mkdir -p /etc/codex
-if [[ -e /etc/codex/config.toml && ! -L /etc/codex/config.toml ]]; then
-	sudo mv /etc/codex/config.toml /etc/codex/config.toml.bak
+	ln -sfn "${HOME}/.ksp/$2" "${target}"
+}
+
+if [[ "${ai_tools}" == "claude" || "${ai_tools}" == "both" ]]; then
+	echo "Please install Claude Code on your computer (https://code.claude.com/docs/en/setup). If you've understood, press any key to continue..."
+	read response
+	mkdir -p ~/.claude
+	link_ksp_config .claude/settings.json claude/settings.json
+	link_ksp_config .claude/CLAUDE.md AGENTS.md
 fi
-sudo ln -sfn "${HOME}/.ksp/codex/config.toml" /etc/codex/config.toml
+
+if [[ "${ai_tools}" == "codex" || "${ai_tools}" == "both" ]]; then
+	echo "Please install Codex on your computer (https://learn.chatgpt.com/docs/codex/cli). If you've understood, press any key to continue..."
+	read response
+	mkdir -p ~/.codex
+	link_ksp_config .codex/AGENTS.md AGENTS.md
+	# The Codex base is the system layer, so ~/.codex/config.toml stays Codex's own local file.
+	sudo mkdir -p /etc/codex
+	if [[ -e /etc/codex/config.toml && ! -L /etc/codex/config.toml ]]; then
+		sudo mv /etc/codex/config.toml /etc/codex/config.toml.bak
+	fi
+	sudo ln -sfn "${HOME}/.ksp/codex/config.toml" /etc/codex/config.toml
+fi
 
 
 echo "Installing tmux plugins..."
