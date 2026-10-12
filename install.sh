@@ -227,6 +227,13 @@ if [[ "${ai_tools}" == "codex" || "${ai_tools}" == "both" ]]; then
 	sudo ln -sfn "${HOME}/.ksp/codex/config.toml" /etc/codex/config.toml
 fi
 
+if [[ "${ai_tools}" != "none" ]]; then
+	echo "Installing shared personal skills..."
+	# Resolve the helper relative to this script, regardless of the caller's cwd.
+	KSP_SETUP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+	bash "${KSP_SETUP_DIR}/setup-agent-skills.sh" "${ai_tools}" || exit 1
+fi
+
 
 echo "Installing tmux plugins..."
 if [[ -x "${TPM_DIR}/bin/install_plugins" ]]; then
