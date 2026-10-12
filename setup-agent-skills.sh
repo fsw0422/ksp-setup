@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Shared checkout: Claude updates it; Codex follows links to its skill folders.
+# Codex links Claude's checkout when available, or its own Git clone otherwise.
 link_codex_skills() {
 	local marketplace_dir="$1" skills_dir="$2"
 	local manifest="${marketplace_dir}/.claude-plugin/plugin.json"
@@ -11,8 +11,8 @@ link_codex_skills() {
 		return 1
 	fi
 	if [[ ! -f "${manifest}" ]]; then
-		echo "Claude's fsw0422 checkout is missing at ${marketplace_dir}." >&2
-		echo "Install Claude Code, then run: bash setup-agent-skills.sh both" >&2
+		echo "The fsw0422 checkout is missing at ${marketplace_dir}." >&2
+		echo "Run: bash setup-agent-skills.sh codex" >&2
 		return 1
 	fi
 	# This marketplace keeps each skill in a named directory at its root.
@@ -68,6 +68,7 @@ main() {
 	local mode="${1:-both}"
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
+	local source_dir="${plugin_dir}/marketplaces/fsw0422"
 	case "${mode}" in
 		claude|codex|both|link-only) ;;
 		*) echo "Usage: bash setup-agent-skills.sh [claude|codex|both|link-only]" >&2; return 1 ;;
@@ -76,7 +77,19 @@ main() {
 		install_claude_plugins || return 1
 	fi
 	if [[ "${mode}" != "claude" ]]; then
-		link_codex_skills "${plugin_dir}/marketplaces/fsw0422" "${HOME}/.agents/skills" || return 1
+		if [[ ! -f "${source_dir}/.claude-plugin/plugin.json" ]]; then
+			source_dir="${HOME}/.agents/sources/fsw0422"
+			if [[ "${mode}" == "codex" ]]; then
+				if [[ -d "${source_dir}/.git" ]]; then
+					git -C "${source_dir}" pull --ff-only || return 1
+				else
+					mkdir -p "${HOME}/.agents/sources" || return 1
+					git clone --branch main https://github.com/fsw0422/skills.git "${source_dir}" || return 1
+				fi
+				echo "Refresh these skills by rerunning: bash setup-agent-skills.sh codex"
+			fi
+		fi
+		link_codex_skills "${source_dir}" "${HOME}/.agents/skills" || return 1
 	fi
 }
 
