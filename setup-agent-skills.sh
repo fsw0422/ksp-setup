@@ -53,19 +53,40 @@ link_skills() {
 	done <<< "${skill_paths}"
 }
 
-configure_claude_plugins() {
-	local installed_plugins
-	if ! command -v claude >/dev/null 2>&1; then
-		echo "Install Claude Code first, then rerun this script." >&2
-		return 1
+configure_browser_mcp() {
+	local mode="$1" repo_dir="$2"
+	local server_name="playwright-chromium-browser"
+	local server_json mcp_command argument installed_plugins plugin
+	local mcp_args=()
+	# Resolve HOME for both clients and let npx install without an interactive prompt.
+	server_json=$(jq -ce --arg home "${HOME}" '
+		.mcpServers.browser | .type = "stdio" |
+		.args |= map(split("${HOME}") | join($home)) |
+		if .command == "npx" then
+			.args = (["-y"] + (.args | map(select(. != "-y" and . != "--yes"))))
+		else . end
+	' "${repo_dir}/playwright-chromium-browser/.mcp.json") || return 1
+
+	if [[ "${mode}" == "claude" || "${mode}" == "both" ]]; then
+		if claude mcp get "${server_name}" >/dev/null 2>&1; then
+			claude mcp remove --scope user "${server_name}" || return 1
+		fi
+		claude mcp add-json --scope user "${server_name}" "${server_json}" || return 1
+		# Disable earlier marketplace installs to avoid duplicate skills and servers.
+		installed_plugins=$(claude plugin list --json) || return 1
+		for plugin in skills@fsw0422 playwright-chromium-browser@fsw0422; do
+			if jq -e --arg id "${plugin}" 'any(.[]; .id == $id and .scope == "user" and .enabled)' <<< "${installed_plugins}" >/dev/null; then
+				claude plugin disable "${plugin}" --scope user || return 1
+			fi
+		done
 	fi
-	installed_plugins=$(claude plugin list --json) || return 1
-	if jq -e 'any(.[]; .id == "skills@fsw0422" and .scope == "user" and .enabled)' <<< "${installed_plugins}" >/dev/null; then
-		claude plugin disable skills@fsw0422 --scope user || return 1
+	if [[ "${mode}" == "codex" || "${mode}" == "both" ]]; then
+		mcp_command=$(jq -er '.command' <<< "${server_json}") || return 1
+		while IFS= read -r argument; do
+			mcp_args+=("${argument}")
+		done < <(jq -r '.args[]' <<< "${server_json}")
+		codex mcp add "${server_name}" -- "${mcp_command}" "${mcp_args[@]}" || return 1
 	fi
-	# The browser is a separate MCP plugin, not one of the linked skills.
-	claude plugin install playwright-chromium-browser --marketplace fsw0422/skills --scope user || return 1
-	claude plugin update playwright-chromium-browser@fsw0422 --scope user || return 1
 }
 
 main() {
@@ -94,8 +115,8 @@ main() {
 	if [[ "${mode}" != "claude" ]]; then
 		link_skills "${source_dir}" "${HOME}/.agents/skills" "${plugin_dir}/marketplaces/fsw0422" || return 1
 	fi
-	if [[ "${mode}" == "claude" || "${mode}" == "both" ]]; then
-		configure_claude_plugins || return 1
+	if [[ "${mode}" != "link-only" ]]; then
+		configure_browser_mcp "${mode}" "${source_dir}" || return 1
 	fi
 }
 
