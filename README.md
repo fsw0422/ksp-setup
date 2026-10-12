@@ -45,13 +45,4 @@ The `restore-session` skill manages Claude Code sessions, even when invoked from
 Codex. For terminal browser automation, follow the Playwright browser installation
 instructions in the skills repository.
 
-## Test
-
-Use the development container to test changes to the installation scripts:
-
-```sh
-python3 -m unittest discover -s tests -v
-```
-
-The tests use temporary marketplace folders and mock plugin commands. They do
-not run the full machine installer, install plugins, or alter your home directory.
+Use the development container when trying changes to the installation scripts.
