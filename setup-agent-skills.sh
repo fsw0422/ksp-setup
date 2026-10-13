@@ -93,7 +93,7 @@ main() {
 	local mode="${1:-both}"
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
-	local source_dir="${HOME}/agent-skills"
+	local source_dir="${HOME}/skills"
 	case "${mode}" in
 		claude|codex|both|link-only) ;;
 		*) echo "Usage: bash setup-agent-skills.sh [claude|codex|both|link-only]" >&2; return 1 ;;
