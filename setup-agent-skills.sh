@@ -34,7 +34,7 @@ link_skills() {
 		if [[ -L "${target}" ]]; then
 			# Migrate only links made by earlier versions of this helper.
 			case "$(readlink "${target}")" in
-				"${source}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
+				"${source}"|"${HOME}/agent-skills/${skill_name}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
 			esac
 		fi
 		if [[ -e "${target}" || -L "${target}" ]]; then
@@ -93,7 +93,7 @@ main() {
 	local mode="${1:-both}"
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
-	local source_dir="${HOME}/agent-skills"
+	local source_dir="${HOME}/skills"
 	case "${mode}" in
 		claude|codex|both|link-only) ;;
 		*) echo "Usage: bash setup-agent-skills.sh [claude|codex|both|link-only]" >&2; return 1 ;;
