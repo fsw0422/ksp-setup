@@ -3,34 +3,33 @@
 # Both platforms read the same checkout; adding a platform only adds links.
 link_skills() {
 	local repo_dir="$1" skills_dir="$2" old_marketplace="$3"
-	local manifest="${repo_dir}/.claude-plugin/plugin.json"
-	local skill_paths skill_path skill_name source target
+	local skill_entry skill_name source target link_target
+	local skill_names=()
 
-	if ! command -v jq >/dev/null 2>&1; then
-		echo "Install jq before linking skills." >&2
-		return 1
-	fi
-	if [[ ! -f "${manifest}" ]]; then
+	if [[ ! -d "${repo_dir}" ]]; then
 		echo "The fsw0422 checkout is missing at ${repo_dir}." >&2
 		echo "Run: bash setup-agent-skills.sh codex" >&2
 		return 1
 	fi
-	# This marketplace keeps each skill in a named directory at its root.
-	skill_paths=$(jq -er '
-		.skills | if type == "array" and length > 0 and
-			all(.[]; type == "string" and test("^\\./[a-z0-9]+(-[a-z0-9]+)*$"))
-		then .[] else error("Expected a non-empty skills array of ./skill-name paths") end
-	' "${manifest}") || return 1
-
-	# Check every source and destination before creating any links.
-	while IFS= read -r skill_path; do
-		skill_name="${skill_path#./}"
-		source="${repo_dir}/${skill_name}"
-		target="${skills_dir}/${skill_name}"
-		if [[ ! -f "${source}/SKILL.md" ]]; then
-			echo "Missing skill entrypoint: ${source}/SKILL.md" >&2
+	for skill_entry in "${repo_dir}"/*/SKILL.md; do
+		[[ -f "${skill_entry}" ]] || continue
+		source="${skill_entry%/SKILL.md}"
+		skill_name="${source##*/}"
+		if [[ ! "${skill_name}" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+			echo "Invalid skill directory name: ${skill_name}" >&2
 			return 1
 		fi
+		skill_names+=("${skill_name}")
+	done
+	if [[ ${#skill_names[@]} -eq 0 ]]; then
+		echo "No top-level skill directories found in ${repo_dir}." >&2
+		return 1
+	fi
+
+	# Check every source and destination before creating or removing any links.
+	for skill_name in "${skill_names[@]}"; do
+		source="${repo_dir}/${skill_name}"
+		target="${skills_dir}/${skill_name}"
 		if [[ -L "${target}" ]]; then
 			# Migrate only links made by earlier versions of this helper.
 			case "$(readlink "${target}")" in
@@ -41,16 +40,29 @@ link_skills() {
 			echo "Keeping existing entry: ${target}. Move it aside before retrying." >&2
 			return 1
 		fi
-	done <<< "${skill_paths}"
+	done
 
 	mkdir -p "${skills_dir}" || return 1
-	while IFS= read -r skill_path; do
-		skill_name="${skill_path#./}"
+	# Remove only stale links that this checkout owns. Preserve all unrelated entries.
+	for target in "${skills_dir}"/*; do
+		[[ -L "${target}" ]] || continue
+		link_target=$(readlink "${target}")
+		case "${link_target}" in
+			"${repo_dir}/"*)
+				skill_name="${target##*/}"
+				if [[ ! -f "${repo_dir}/${skill_name}/SKILL.md" ]]; then
+					unlink "${target}" || return 1
+					echo "Removed stale skill link: ${target}"
+				fi
+				;;
+		esac
+	done
+	for skill_name in "${skill_names[@]}"; do
 		source="${repo_dir}/${skill_name}"
 		target="${skills_dir}/${skill_name}"
 		ln -sfn "${source}" "${target}" || return 1
 		echo "${target} -> ${source}"
-	done <<< "${skill_paths}"
+	done
 }
 
 configure_browser_mcp() {
