@@ -34,7 +34,7 @@ link_skills() {
 		if [[ -L "${target}" ]]; then
 			# Migrate only links made by earlier versions of this helper.
 			case "$(readlink "${target}")" in
-				"${source}"|"${HOME}/agent-skills/${skill_name}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
+				"${source}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
 			esac
 		fi
 		if [[ -e "${target}" || -L "${target}" ]]; then
