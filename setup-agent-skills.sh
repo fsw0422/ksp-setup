@@ -60,8 +60,7 @@ link_skills() {
 	local skill_names=()
 
 	if [[ ! -d "${repo_dir}" ]]; then
-		echo "The fsw0422 checkout is missing at ${repo_dir}." >&2
-		echo "Run: bash setup-agent-skills.sh codex" >&2
+		echo "Skill source directory is missing: ${repo_dir}" >&2
 		return 1
 	fi
 	for skill_entry in "${repo_dir}"/*/SKILL.md; do
@@ -168,6 +167,9 @@ main() {
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
 	local source_dir="${HOME}/skills"
+	local project_skill_source="${HOME}/projects/shared-skills"
+	local project_codex_skills="${HOME}/projects/.agents/skills"
+	local project_claude_skills="${HOME}/projects/.claude/skills"
 	case "${requested_mode}" in
 		auto|claude|codex|both) ;;
 		link-only) link_only=true; requested_mode=auto ;;
@@ -190,6 +192,15 @@ main() {
 	fi
 	if [[ "${mode}" != "claude" ]]; then
 		link_skills "${source_dir}" "${HOME}/.agents/skills" "${plugin_dir}/marketplaces/fsw0422" || return 1
+	fi
+	# Keep provider-neutral project skills in one source and link installed clients to it.
+	if [[ -d "${project_skill_source}" ]]; then
+		if [[ "${mode}" != "codex" ]]; then
+			link_skills "${project_skill_source}" "${project_claude_skills}" "${HOME}/projects/.agents/skills" || return 1
+		fi
+		if [[ "${mode}" != "claude" ]]; then
+			link_skills "${project_skill_source}" "${project_codex_skills}" "${HOME}/projects/.codex/skills" || return 1
+		fi
 	fi
 	if [[ "${link_only}" != "true" ]]; then
 		configure_browser_mcp "${mode}" "${source_dir}" || return 1
