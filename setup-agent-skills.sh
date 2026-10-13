@@ -1,6 +1,59 @@
 #!/bin/bash
 
 # Both platforms read the same checkout; adding a platform only adds links.
+platform_installed() {
+	case "$1" in
+		claude)
+			command -v claude >/dev/null 2>&1 ||
+				[[ -d "/Applications/Claude.app" || -d "${HOME}/Applications/Claude.app" ||
+					-d "/Applications/Claude Code.app" || -d "${HOME}/Applications/Claude Code.app" ]]
+			;;
+		codex)
+			command -v codex >/dev/null 2>&1 ||
+				[[ -d "/Applications/Codex.app" || -d "${HOME}/Applications/Codex.app" ||
+					-d "/Applications/ChatGPT.app" || -d "${HOME}/Applications/ChatGPT.app" ]]
+			;;
+		*) return 1 ;;
+	esac
+}
+
+select_installed_mode() {
+	local requested="$1"
+	local want_claude=false want_codex=false
+	local use_claude=false use_codex=false
+
+	case "${requested}" in
+		auto|both) want_claude=true; want_codex=true ;;
+		claude) want_claude=true ;;
+		codex) want_codex=true ;;
+		*) return 1 ;;
+	esac
+	if [[ "${want_claude}" == "true" ]]; then
+		if platform_installed claude; then
+			use_claude=true
+		else
+			echo "Claude is not installed; skipping Claude skill links." >&2
+		fi
+	fi
+	if [[ "${want_codex}" == "true" ]]; then
+		if platform_installed codex; then
+			use_codex=true
+		else
+			echo "Codex is not installed; skipping Codex skill links." >&2
+		fi
+	fi
+	if [[ "${use_claude}" == "true" && "${use_codex}" == "true" ]]; then
+		echo both
+	elif [[ "${use_claude}" == "true" ]]; then
+		echo claude
+	elif [[ "${use_codex}" == "true" ]]; then
+		echo codex
+	else
+		echo "No requested AI platform is installed." >&2
+		return 1
+	fi
+}
+
 link_skills() {
 	local repo_dir="$1" skills_dir="$2" old_marketplace="$3"
 	local skill_entry skill_name source target link_target
@@ -80,37 +133,48 @@ configure_browser_mcp() {
 	' "${repo_dir}/playwright-chromium-browser/.mcp.json") || return 1
 
 	if [[ "${mode}" == "claude" || "${mode}" == "both" ]]; then
-		if claude mcp get "${server_name}" >/dev/null 2>&1; then
-			claude mcp remove --scope user "${server_name}" || return 1
-		fi
-		claude mcp add-json --scope user "${server_name}" "${server_json}" || return 1
-		# Disable earlier marketplace installs to avoid duplicate skills and servers.
-		installed_plugins=$(claude plugin list --json) || return 1
-		for plugin in skills@fsw0422 playwright-chromium-browser@fsw0422; do
-			if jq -e --arg id "${plugin}" 'any(.[]; .id == $id and .scope == "user" and .enabled)' <<< "${installed_plugins}" >/dev/null; then
-				claude plugin disable "${plugin}" --scope user || return 1
+		if command -v claude >/dev/null 2>&1; then
+			if claude mcp get "${server_name}" >/dev/null 2>&1; then
+				claude mcp remove --scope user "${server_name}" || return 1
 			fi
-		done
+			claude mcp add-json --scope user "${server_name}" "${server_json}" || return 1
+			# Disable earlier marketplace installs to avoid duplicate skills and servers.
+			installed_plugins=$(claude plugin list --json) || return 1
+			for plugin in skills@fsw0422 playwright-chromium-browser@fsw0422; do
+				if jq -e --arg id "${plugin}" 'any(.[]; .id == $id and .scope == "user" and .enabled)' <<< "${installed_plugins}" >/dev/null; then
+					claude plugin disable "${plugin}" --scope user || return 1
+				fi
+			done
+		else
+			echo "Claude desktop app found without the Claude CLI; skipping Claude MCP registration." >&2
+		fi
 	fi
 	if [[ "${mode}" == "codex" || "${mode}" == "both" ]]; then
-		mcp_command=$(jq -er '.command' <<< "${server_json}") || return 1
-		while IFS= read -r argument; do
-			mcp_args+=("${argument}")
-		done < <(jq -r '.args[]' <<< "${server_json}")
-		codex mcp add "${server_name}" -- "${mcp_command}" "${mcp_args[@]}" || return 1
+		if command -v codex >/dev/null 2>&1; then
+			mcp_command=$(jq -er '.command' <<< "${server_json}") || return 1
+			while IFS= read -r argument; do
+				mcp_args+=("${argument}")
+			done < <(jq -r '.args[]' <<< "${server_json}")
+			codex mcp add "${server_name}" -- "${mcp_command}" "${mcp_args[@]}" || return 1
+		else
+			echo "Codex desktop app found without the Codex CLI; skipping Codex MCP registration." >&2
+		fi
 	fi
 }
 
 main() {
-	local mode="${1:-both}"
+	local requested_mode="${1:-auto}" mode
+	local link_only=false
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
 	local source_dir="${HOME}/skills"
-	case "${mode}" in
-		claude|codex|both|link-only) ;;
-		*) echo "Usage: bash setup-agent-skills.sh [claude|codex|both|link-only]" >&2; return 1 ;;
+	case "${requested_mode}" in
+		auto|claude|codex|both) ;;
+		link-only) link_only=true; requested_mode=auto ;;
+		*) echo "Usage: bash setup-agent-skills.sh [auto|claude|codex|both|link-only]" >&2; return 1 ;;
 	esac
-	if [[ "${mode}" != "link-only" ]]; then
+	mode=$(select_installed_mode "${requested_mode}") || return 1
+	if [[ "${link_only}" != "true" ]]; then
 		if [[ -d "${source_dir}/.git" ]]; then
 			if [[ "$(git -C "${source_dir}" branch --show-current)" != "main" ]]; then
 				echo "${source_dir} is not on main; keeping its branch unchanged." >&2
@@ -127,7 +191,7 @@ main() {
 	if [[ "${mode}" != "claude" ]]; then
 		link_skills "${source_dir}" "${HOME}/.agents/skills" "${plugin_dir}/marketplaces/fsw0422" || return 1
 	fi
-	if [[ "${mode}" != "link-only" ]]; then
+	if [[ "${link_only}" != "true" ]]; then
 		configure_browser_mcp "${mode}" "${source_dir}" || return 1
 	fi
 }
