@@ -211,14 +211,12 @@ if [[ "${ai_tools}" == "claude" || "${ai_tools}" == "both" ]]; then
 	read response
 	mkdir -p ~/.claude
 	link_ksp_config .claude/settings.json claude/settings.json
-	link_ksp_config .claude/CLAUDE.md AGENTS.md
 fi
 
 if [[ "${ai_tools}" == "codex" || "${ai_tools}" == "both" ]]; then
 	echo "Please install Codex on your computer (https://learn.chatgpt.com/docs/codex/cli). If you've understood, press any key to continue..."
 	read response
 	mkdir -p ~/.codex
-	link_ksp_config .codex/AGENTS.md AGENTS.md
 	# The Codex base is the system layer, so ~/.codex/config.toml stays Codex's own local file.
 	sudo mkdir -p /etc/codex
 	if [[ -e /etc/codex/config.toml && ! -L /etc/codex/config.toml ]]; then
@@ -228,7 +226,7 @@ if [[ "${ai_tools}" == "codex" || "${ai_tools}" == "both" ]]; then
 fi
 
 if [[ "${ai_tools}" != "none" ]]; then
-	echo "Installing shared personal skills..."
+	echo "Installing shared agent instructions and skills..."
 	# Resolve the helper relative to this script, regardless of the caller's cwd.
 	KSP_SETUP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 	bash "${KSP_SETUP_DIR}/setup-agent-skills.sh" "${ai_tools}" || exit 1
