@@ -32,14 +32,14 @@ select_installed_mode() {
 		if platform_installed claude; then
 			use_claude=true
 		else
-			echo "Claude is not installed; skipping Claude skill links." >&2
+			echo "Claude is not installed; skipping Claude instruction and skill links." >&2
 		fi
 	fi
 	if [[ "${want_codex}" == "true" ]]; then
 		if platform_installed codex; then
 			use_codex=true
 		else
-			echo "Codex is not installed; skipping Codex skill links." >&2
+			echo "Codex is not installed; skipping Codex instruction and skill links." >&2
 		fi
 	fi
 	if [[ "${use_claude}" == "true" && "${use_codex}" == "true" ]]; then
@@ -52,6 +52,54 @@ select_installed_mode() {
 		echo "No requested AI platform is installed." >&2
 		return 1
 	fi
+}
+
+link_agent_instructions() {
+	local mode="$1" repo_dir="$2" claude_dir="$3"
+	local source="${repo_dir}/AGENTS.md"
+	local legacy_source="${HOME}/.ksp/AGENTS.md"
+	local target link_target backup
+	local targets=()
+
+	if [[ ! -f "${source}" ]]; then
+		echo "Shared agent instructions are missing at ${source}." >&2
+		return 1
+	fi
+	if [[ "${mode}" != "codex" ]]; then
+		targets+=("${claude_dir}/CLAUDE.md")
+	fi
+	if [[ "${mode}" != "claude" ]]; then
+		targets+=("${HOME}/.codex/AGENTS.md")
+	fi
+	# Validate every destination before changing either platform.
+	for target in "${targets[@]}"; do
+		if [[ -L "${target}" ]]; then
+			link_target=$(readlink "${target}")
+			case "${link_target}" in
+				"${source}"|"${legacy_source}") ;;
+				*)
+					echo "Keeping existing instruction link: ${target} -> ${link_target}." >&2
+					return 1
+					;;
+			esac
+		elif [[ -e "${target}" ]]; then
+			backup="${target}.bak"
+			if [[ -e "${backup}" || -L "${backup}" ]]; then
+				echo "Cannot preserve ${target}; backup already exists at ${backup}." >&2
+				return 1
+			fi
+		fi
+	done
+	for target in "${targets[@]}"; do
+		mkdir -p "$(dirname "${target}")" || return 1
+		if [[ -e "${target}" && ! -L "${target}" ]]; then
+			backup="${target}.bak"
+			mv "${target}" "${backup}" || return 1
+			echo "Preserved existing instructions: ${backup}"
+		fi
+		ln -sfn "${source}" "${target}" || return 1
+		echo "${target} -> ${source}"
+	done
 }
 
 link_skills() {
@@ -185,6 +233,7 @@ main() {
 			git clone --branch main https://github.com/fsw0422/skills.git "${source_dir}" || return 1
 		fi
 	fi
+	link_agent_instructions "${mode}" "${source_dir}" "${claude_dir}" || return 1
 	if [[ "${mode}" != "codex" ]]; then
 		link_skills "${source_dir}" "${claude_dir}/skills" "${plugin_dir}/marketplaces/fsw0422" || return 1
 	fi
