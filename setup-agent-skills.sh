@@ -58,6 +58,7 @@ link_agent_instructions() {
 	local mode="$1" repo_dir="$2" claude_dir="$3"
 	local source="${repo_dir}/AGENTS.md"
 	local legacy_source="${HOME}/.ksp/AGENTS.md"
+	local standalone_source="${HOME}/skills/AGENTS.md"
 	local target link_target backup
 	local targets=()
 
@@ -76,7 +77,7 @@ link_agent_instructions() {
 		if [[ -L "${target}" ]]; then
 			link_target=$(readlink "${target}")
 			case "${link_target}" in
-				"${source}"|"${legacy_source}") ;;
+				"${source}"|"${legacy_source}"|"${standalone_source}") ;;
 				*)
 					echo "Keeping existing instruction link: ${target} -> ${link_target}." >&2
 					return 1
@@ -108,8 +109,8 @@ link_skills() {
 	local skill_names=()
 
 	if [[ ! -d "${repo_dir}" ]]; then
-		echo "The fsw0422 checkout is missing at ${repo_dir}." >&2
-		echo "Run: bash setup-agent-skills.sh codex" >&2
+		echo "The shared skills directory is missing at ${repo_dir}." >&2
+		echo "Update or reinstall ~/.ksp before retrying." >&2
 		return 1
 	fi
 	for skill_entry in "${repo_dir}"/*/SKILL.md; do
@@ -134,7 +135,7 @@ link_skills() {
 		if [[ -L "${target}" ]]; then
 			# Migrate only links made by earlier versions of this helper.
 			case "$(readlink "${target}")" in
-				"${source}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
+				"${source}"|"${HOME}/skills/${skill_name}"|"${old_marketplace}/${skill_name}"|"${HOME}/.agents/sources/fsw0422/${skill_name}") continue ;;
 			esac
 		fi
 		if [[ -e "${target}" || -L "${target}" ]]; then
@@ -149,7 +150,7 @@ link_skills() {
 		[[ -L "${target}" ]] || continue
 		link_target=$(readlink "${target}")
 		case "${link_target}" in
-			"${repo_dir}/"*)
+			"${repo_dir}/"*|"${HOME}/skills/"*)
 				skill_name="${target##*/}"
 				if [[ ! -f "${repo_dir}/${skill_name}/SKILL.md" ]]; then
 					unlink "${target}" || return 1
@@ -215,23 +216,17 @@ main() {
 	local link_only=false
 	local claude_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 	local plugin_dir="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${claude_dir}/plugins}"
-	local source_dir="${HOME}/skills"
+	local source_dir="${HOME}/.ksp/skills"
 	case "${requested_mode}" in
 		auto|claude|codex|both) ;;
 		link-only) link_only=true; requested_mode=auto ;;
 		*) echo "Usage: bash setup-agent-skills.sh [auto|claude|codex|both|link-only]" >&2; return 1 ;;
 	esac
 	mode=$(select_installed_mode "${requested_mode}") || return 1
-	if [[ "${link_only}" != "true" ]]; then
-		if [[ -d "${source_dir}/.git" ]]; then
-			if [[ "$(git -C "${source_dir}" branch --show-current)" != "main" ]]; then
-				echo "${source_dir} is not on main; keeping its branch unchanged." >&2
-				return 1
-			fi
-			git -C "${source_dir}" pull --ff-only || return 1
-		else
-			git clone --branch main https://github.com/fsw0422/skills.git "${source_dir}" || return 1
-		fi
+	if [[ ! -d "${source_dir}" ]]; then
+		echo "The shared skills directory is missing at ${source_dir}." >&2
+		echo "Update or reinstall ~/.ksp before retrying." >&2
+		return 1
 	fi
 	link_agent_instructions "${mode}" "${source_dir}" "${claude_dir}" || return 1
 	if [[ "${mode}" != "codex" ]]; then
