@@ -64,6 +64,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	echo "Installing Git Credential Manager"
 	brew install --cask git-credential-manager
 	git-credential-manager configure
+
+	# Hammerspoon (hotkeys), configured from ~/.ksp/hammerspoon below
+	echo "Installing Hammerspoon"
+	brew install --cask hammerspoon
 else
 	# Prerequisites needed before setting up APT repositories
 	echo "Installing prerequisites (curl, wget, gpg)"
@@ -179,6 +183,15 @@ echo "Please download and install all MesloLGS fonts from https://github.com/rom
 read response
 
 
+# Links ~/<target> to ~/.ksp/<source>, keeping an existing real file or folder as .bak.
+link_ksp_config() {
+	local target="${HOME}/$1"
+	if [[ -e "${target}" && ! -L "${target}" ]]; then
+		mv "${target}" "${target}.bak"
+	fi
+	ln -sfn "${HOME}/.ksp/$2" "${target}"
+}
+
 echo "Installing configs..."
 git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.tmux.conf ] && rm ~/.tmux.conf; ln -s ~/.ksp/.tmux.conf ~/.tmux.conf
@@ -186,6 +199,19 @@ git clone https://github.com/fsw0422/.ksp.git ~/.ksp
 [ -f ~/.zshrc ] && rm ~/.zshrc; ln -s ~/.ksp/.zshrc ~/.zshrc
 [ -f ~/.ideavimrc ] && rm ~/.ideavimrc; ln -s ~/.ksp/.ideavimrc ~/.ideavimrc
 [ -f ~/.vimrc ] && rm ~/.vimrc; ln -s ~/.ksp/.vimrc ~/.vimrc
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	echo "Installing Hammerspoon config..."
+	link_ksp_config .hammerspoon hammerspoon
+	# Opening it loads the config, which turns on launch at login and asks for Screen Recording access.
+	open -a Hammerspoon
+	echo "Please allow Hammerspoon in System Settings > Privacy & Security > Screen & System Audio Recording, so its screenshots show your windows. If you've understood, press any key to continue..."
+	read response
+	if [[ ! -e ~/OneDrive ]]; then
+		echo "Silent screenshot (Ctrl-Cmd-S) saves to ~/OneDrive. Please link it to your OneDrive folder, e.g. 'ln -s ~/Library/CloudStorage/OneDrive-Personal ~/OneDrive'. If you've understood, press any key to continue..."
+		read response
+	fi
+fi
 
 
 echo "Installing Claude Code and Codex configs..."
@@ -196,15 +222,6 @@ while true; do
 		claude|codex|both|none) break ;;
 	esac
 done
-
-# Links ~/<target> to ~/.ksp/<source>, keeping an existing real file as .bak.
-link_ksp_config() {
-	local target="${HOME}/$1"
-	if [[ -e "${target}" && ! -L "${target}" ]]; then
-		mv "${target}" "${target}.bak"
-	fi
-	ln -sfn "${HOME}/.ksp/$2" "${target}"
-}
 
 if [[ "${ai_tools}" == "claude" || "${ai_tools}" == "both" ]]; then
 	echo "Please install Claude Code on your computer (https://code.claude.com/docs/en/setup). If you've understood, press any key to continue..."
